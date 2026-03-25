@@ -1,0 +1,86 @@
+# ==========================================
+# UNITY - Archivos temporales y generados
+# ==========================================
+[Cc]lean/
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Vv]ersionControl/
+[Uu]serSettings/
+
+# Ignorar archivos de solución de Visual Studio para Unity
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.IDB
+*.VC.db
+
+# Ignorar archivos de sistema de carpetas de Unity
+.DS_Store
+Thumbs.db
+
+# Crash reports de Unity
+sysinfo.txt
+
+# ==========================================
+# PYTHON - Entornos y caché
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+bin/
+lib/
+develop-eggs/
+dist/
+eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# ==========================================
+# VISUAL STUDIO CODE & EDITORES
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.patch
+
+# ==========================================
+# CONFIGURACIÓN ESPECÍFICA DE TUS CARPETAS
+# (Asegúrate de que estos nombres coincidan con los tuyos)
+# ==========================================
+Unity_Client/[Ll]ibrary/
+Unity_Client/[Tt]emp/
+Unity_Client/[Oo]bj/
+Unity_Client/[Bb]uild/
+Unity_Client/[Uu]serSettings/
+
+Python_Backend/venv/
+Python_Backend/__pycache__/
