@@ -62,7 +62,9 @@ public class NetworkAnimation : MonoBehaviour
                 Random.Range(0f, h)
             );
 
-            float size = Random.Range(6f, 14f);
+            float size = Random.Range(0f, 1f) > 0.8f 
+                ? Random.Range(25f, 45f)   // 20% de los nodos son grandes
+                : Random.Range(8f, 18f);   // 80% son pequeños
             rt.sizeDelta = new Vector2(size, size);
 
             Vector2 vel = new Vector2(
