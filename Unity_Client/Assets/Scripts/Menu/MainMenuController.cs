@@ -3,8 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
-    // Nombre exacto de la escena del simulador
     private const string SIMULATOR_SCENE = "Simulator";
+    private const string SETTINGS_SCENE = "Settings";
 
     public void OnBeginButtonClicked()
     {
@@ -13,8 +13,7 @@ public class MainMenuController : MonoBehaviour
 
     public void OnSettingsButtonClicked()
     {
-        
-        Debug.Log("Ajustes: aún no implementado");
+        SceneManager.LoadScene(SETTINGS_SCENE);
     }
 
     public void OnExitButtonClicked()
