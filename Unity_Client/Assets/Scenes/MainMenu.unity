@@ -1349,6 +1349,7 @@ GameObject:
   - component: {fileID: 1307706004}
   - component: {fileID: 1307706006}
   - component: {fileID: 1307706005}
+  - component: {fileID: 1307706007}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -1417,6 +1418,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1307706003}
   m_CullTransparentMesh: 1
+--- !u!114 &1307706007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1307706003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfa62c1ab9e89db46aa7583f24bfd9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIGradient
+  startColor: {r: 0.05882353, g: 0.09019608, b: 0.16470589, a: 1}
+  endColor: {r: 0.11764706, g: 0.16078432, b: 0.23137255, a: 1}
+  angle: 319
 --- !u!1 &1392862461
 GameObject:
   m_ObjectHideFlags: 0

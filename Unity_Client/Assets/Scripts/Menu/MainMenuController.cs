@@ -3,12 +3,12 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
-    private const string SIMULATOR_SCENE = "Simulator";
+    private const string LOGIN_SCENE    = "Login";
     private const string SETTINGS_SCENE = "Settings";
 
     public void OnBeginButtonClicked()
     {
-        SceneManager.LoadScene(SIMULATOR_SCENE);
+        SceneManager.LoadScene(LOGIN_SCENE);
     }
 
     public void OnSettingsButtonClicked()
