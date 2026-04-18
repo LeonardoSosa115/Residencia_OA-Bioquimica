@@ -14,6 +14,10 @@ public class ParticleSpawner : MonoBehaviour
     public TMP_InputField inputNeutrones;
     public TMP_InputField inputElectrones;
 
+    public ParticleContainer ContainerProtones   => containerProtones;
+    public ParticleContainer ContainerNeutrones  => containerNeutrones;
+    public ParticleContainer ContainerElectrones => containerElectrones;
+
     void Start()
     {
         ActualizarUI();
@@ -86,7 +90,7 @@ public class ParticleSpawner : MonoBehaviour
     }
 
     // ── Utilidades ────────────────────────────
-    private void ActualizarUI()
+    public void ActualizarUI()
     {
         if (inputProtones != null)
             inputProtones.text = containerProtones.CurrentCount.ToString();

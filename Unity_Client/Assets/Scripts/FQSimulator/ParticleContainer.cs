@@ -20,9 +20,10 @@ public class ParticleContainer : MonoBehaviour
     {
         if (currentCount >= maxParticles) return;
 
-        Vector3 spawnPos = transform.position;
+        Vector3 spawnPos = spawnPoint != null 
+            ? spawnPoint.position 
+            : transform.position;
 
-        // Pequeño offset aleatorio para que no spawnen en el mismo punto
         spawnPos += new Vector3(
             Random.Range(-0.2f, 0.2f),
             Random.Range(-0.2f, 0.2f),
@@ -36,6 +37,7 @@ public class ParticleContainer : MonoBehaviour
         {
             particle.particleType = containerType;
             particle.SetInContainer(true);
+            particle.myContainer = this; // ← agrega esto
         }
 
         particles.Add(p);
@@ -67,5 +69,14 @@ public class ParticleContainer : MonoBehaviour
 
         particles.Clear();
         currentCount = 0;
+    }
+
+    public void RemoveSpecific(GameObject particle)
+    {
+        if (particles.Contains(particle))
+        {
+            particles.Remove(particle);
+            currentCount--;
+        }
     }
 }
