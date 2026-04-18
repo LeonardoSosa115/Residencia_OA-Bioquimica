@@ -28,6 +28,8 @@ public class Particle : MonoBehaviour
     private Vector3 offset;
     private Camera mainCamera;
 
+    public bool IsDragging => isDragging;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

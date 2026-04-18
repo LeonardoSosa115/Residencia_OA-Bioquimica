@@ -35,6 +35,8 @@ public class AtomController : MonoBehaviour
     private List<GameObject>[] orbitElectrons;
     private List<GameObject> nucleusParticles = new List<GameObject>();
 
+    private AtomInfoPanel infoPanel;
+
     // Tabla periódica simplificada (número atómico → nombre)
     private readonly Dictionary<int, string> elementNames = new Dictionary<int, string>()
     {
@@ -53,6 +55,8 @@ public class AtomController : MonoBehaviour
         orbitElectrons = new List<GameObject>[4];
         for (int i = 0; i < 4; i++)
             orbitElectrons[i] = new List<GameObject>();
+
+        infoPanel = FindObjectOfType<AtomInfoPanel>();
     }
 
     // ── Añadir partículas al átomo ────────────────────────────
@@ -60,20 +64,24 @@ public class AtomController : MonoBehaviour
     public void AddProton()
     {
         protonCount++;
+        Debug.Log($"[AtomController] AddProton llamado. ProtonCount ahora: {protonCount}");
         SpawnNucleusParticle(protonVisualPrefab);
         ActualizarNombre();
+        NotificarCambio();
     }
 
     public void AddNeutron()
     {
         neutronCount++;
         SpawnNucleusParticle(neutronVisualPrefab);
+        NotificarCambio();
     }
 
     public void AddElectron()
     {
         electronCount++;
         SpawnElectronVisual();
+        NotificarCambio();
     }
 
     // ── Remover partículas del átomo ──────────────────────────
@@ -84,6 +92,7 @@ public class AtomController : MonoBehaviour
         protonCount--;
         RemoveLastNucleusParticle(ParticleType.Proton);
         ActualizarNombre();
+        NotificarCambio();
     }
 
     public void RemoveNeutron()
@@ -91,6 +100,7 @@ public class AtomController : MonoBehaviour
         if (neutronCount <= 0) return;
         neutronCount--;
         RemoveLastNucleusParticle(ParticleType.Neutron);
+        NotificarCambio();
     }
 
     public void RemoveElectron()
@@ -98,6 +108,7 @@ public class AtomController : MonoBehaviour
         if (electronCount <= 0) return;
         electronCount--;
         RemoveLastElectronVisual();
+        NotificarCambio();
     }
 
     // ── Núcleo ────────────────────────────────────────────────
@@ -237,6 +248,7 @@ public class AtomController : MonoBehaviour
                 orbitElectrons[i].Remove(electronObj);
                 electronCount--;
                 ReposicionarElectrones(i);
+                NotificarCambio();
                 return;
             }
         }
@@ -248,6 +260,7 @@ public class AtomController : MonoBehaviour
         {
             nucleusParticles.Remove(protonObj);
             protonCount--;
+            NotificarCambio();
             ActualizarNombre();
         }
     }
@@ -258,6 +271,7 @@ public class AtomController : MonoBehaviour
         {
             nucleusParticles.Remove(neutronObj);
             neutronCount--;
+            NotificarCambio();
         }
     }
 
@@ -278,6 +292,12 @@ public class AtomController : MonoBehaviour
         if (index < orbitRadii.Length)
             return orbitRadii[index];
         return 1f;
+    }
+
+    void NotificarCambio()
+    {
+        if (infoPanel != null)
+            infoPanel.ActualizarInfo();
     }
 
     // ── Nombre del elemento ───────────────────────────────────
