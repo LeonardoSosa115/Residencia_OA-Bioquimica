@@ -170,3 +170,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Particle
   particleType: 2
+  isInNucleus: 0
+  atomController: {fileID: 0}
+  particleSpawner: {fileID: 0}
+  myContainer: {fileID: 0}
