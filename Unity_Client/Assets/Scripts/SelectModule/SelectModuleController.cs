@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class SelectModuleController : MonoBehaviour
 {
-    private const string SIMULATOR_SCENE = "FQSimulator";
+    private const string SIMULATOR_SCENE = "Introduction";
     private const string LOGIN_SCENE     = "Login";
 
     public void OnFisicoquimicaClicked()
