@@ -1,67 +1,212 @@
 using UnityEngine;
-using TMPro; // Necesario para la UI moderna de Unity
-using System;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic; // ¡Nuevo! Necesario para el historial del Tooltip
 
-public class UIController : MonoBehaviour
+public class BioUIController : MonoBehaviour
 {
-    [Header("Inputs del Usuario (Separados por coma)")]
-    public TMP_InputField inputSustrato;
-    public TMP_InputField inputVelocidad;
+    [Header("Sliders - Condiciones Iniciales")]
+    public Slider sliderS0;
+    public Slider sliderX0;
+    public Slider sliderV0;
+    public TMP_Text indicatorS0;
+    public TMP_Text indicatorX0;
+    public TMP_Text indicatorV0;
 
-    [Header("Outputs (Resultados)")]
-    public TMP_Text textVmax;
-    public TMP_Text textKm;
-    public TMP_Text textR2;
-    public TMP_Text textMensajeError;
+    [Header("Sliders - Parámetros Cinéticos")]
+    public Slider sliderUmax;
+    public Slider sliderKs;
+    public Slider sliderYxs;
+    public TMP_Text indicatorUmax;
+    public TMP_Text indicatorKs;
+    public TMP_Text indicatorYxs;
 
-    public void OnCalcularButtonClicked()
+    [Header("Textos de Interfaz")]
+    public TMP_Text textConsole;
+    public TMP_Text topHudTextS;
+    public TMP_Text topHudTextX;
+    public TMP_Text topHudTextU; 
+
+    [Header("Panel Derecho (KPIs)")]
+    public TextMeshProUGUI textTiempo;
+    public TextMeshProUGUI textProductividad;
+
+    [Header("Panel Central (Indicadores)")]
+    public TextMeshProUGUI textTiempoDuplicacion;
+    public TextMeshProUGUI textSustratoAgotado;
+
+    [Header("Gráfica Central Analítica")]
+    public AnalyticChart analyticChart;
+
+    // --- ESTRUCTURA PARA EL TOOLTIP ---
+    public struct PuntoSimulado
     {
-        textMensajeError.text = ""; // Limpiar errores previos
+        public float tiempo;
+        public float biomasa;
+        public float sustrato;
+    }
+    // Lista pública que el Tooltip consultará para buscar datos
+    [HideInInspector] 
+    public List<PuntoSimulado> historialPuntos = new List<PuntoSimulado>();
 
-        try
+    // --- VARIABLES INTERNAS DEL SIMULADOR ---
+    private bool isSimulating = false;
+    private double currentS;
+    private double currentX;
+    private double simUmax;
+    private double simKs;
+    private double simYxs;
+    private double timeElapsed = 0;
+    private float simSpeed = 1f; 
+
+    public BioChart bioChart;
+    private float timerGrafica = 0f;
+    private float intervaloMuestreo = 0.2f; 
+
+    private bool yaSeAgoto = false;
+
+    void Start()
+    {
+        sliderS0.onValueChanged.AddListener(delegate { ActualizarTextosSliders(); });
+        sliderX0.onValueChanged.AddListener(delegate { ActualizarTextosSliders(); });
+        sliderV0.onValueChanged.AddListener(delegate { ActualizarTextosSliders(); });
+        sliderUmax.onValueChanged.AddListener(delegate { ActualizarTextosSliders(); });
+        sliderKs.onValueChanged.AddListener(delegate { ActualizarTextosSliders(); });
+        sliderYxs.onValueChanged.AddListener(delegate { ActualizarTextosSliders(); });
+
+        textConsole.text = "Sistema listo. Esperando parámetros...";
+        ActualizarTextosSliders(); 
+
+        if (analyticChart != null)
         {
-            // 1. Leer y convertir los datos ingresados por el estudiante
-            string[] strS = inputSustrato.text.Split(',');
-            string[] strV = inputVelocidad.text.Split(',');
-
-            if (strS.Length != strV.Length)
-            {
-                throw new Exception("Las columnas de Sustrato y Velocidad deben tener la misma cantidad de datos.");
-            }
-
-            double[] S = Array.ConvertAll(strS, double.Parse);
-            double[] v = Array.ConvertAll(strV, double.Parse);
-
-            // 2. Ejecutar el motor matemático
-            double Vmax, Km, rSquared;
-            BiocineticsEngine.CalculateParameters(S, v, out Vmax, out Km, out rSquared);
-
-            // 3. Mostrar resultados en la UI
-            textVmax.text = "Vmax: " + Vmax.ToString("F4");
-            textKm.text = "Km: " + Km.ToString("F4");
-            textR2.text = "R²: " + rSquared.ToString("F4");
-
-            // 4. Guardar datos locales (Simulación de la base de datos)
-            SimulationData newData = new SimulationData("Alumno_Test", S, v, Vmax, Km, rSquared);
-            string jsonOutput = JsonUtility.ToJson(newData, true);
-            Debug.Log("Datos guardados localmente:\n" + jsonOutput);
-
-            // 5. Llamada a la actualización de gráficas
-            UpdateGraphVisuals(Vmax, Km);
-        }
-        catch (FormatException)
-        {
-            textMensajeError.text = "Error: Por favor ingresa solo números separados por comas.";
-        }
-        catch (Exception e)
-        {
-            textMensajeError.text = e.Message;
+            analyticChart.ActualizarLineWeaverBurk(sliderUmax.value, sliderKs.value);
         }
     }
 
-    private void UpdateGraphVisuals(double Vmax, double Km)
+    private void ActualizarTextosSliders()
     {
-        // Aquí se conectaría con el script encargado de mover los puntos en la gráfica 2D
-        Debug.Log($"Actualizando gráfica 2D con los nuevos parámetros: Vmax={Vmax}, Km={Km}");
+        indicatorS0.text = sliderS0.value.ToString("F2");
+        indicatorX0.text = sliderX0.value.ToString("F2");
+        indicatorV0.text = sliderV0.value.ToString("F2");
+        
+        indicatorUmax.text = sliderUmax.value.ToString("F2");
+        indicatorKs.text = sliderKs.value.ToString("F2");
+        indicatorYxs.text = sliderYxs.value.ToString("F2");
+
+        // --- ACTUALIZACIÓN DE LA RECTA ANALÍTICA EN TIEMPO REAL ---
+        if (analyticChart != null)
+        {
+            analyticChart.ActualizarLineWeaverBurk(sliderUmax.value, sliderKs.value);
+        }
+    }
+
+    public void OnIniciarSimulacionClicked()
+    {
+        textConsole.text = "Simulación en curso...";
+        bioChart.ConfigurarLimites((float)sliderS0.value); 
+        bioChart.LimpiarGrafica();
+        historialPuntos.Clear(); // Vaciamos el historial anterior para el Tooltip
+        
+        timerGrafica = 0f; 
+        currentS = sliderS0.value;
+        currentX = sliderX0.value;
+        simUmax = sliderUmax.value;
+        simKs = sliderKs.value;
+        simYxs = sliderYxs.value;
+        timeElapsed = 0;
+        textSustratoAgotado.text = "Sustrato agotado en: -- hrs";
+        yaSeAgoto = false;
+
+        isSimulating = true;
+    }
+
+    void Update()
+    {
+        if (!isSimulating) return;
+
+        double dt = Time.deltaTime * simSpeed;
+        timeElapsed += dt;
+
+        double currentU = (simUmax * currentS) / (simKs + currentS);
+
+        double deltaX = currentU * currentX * dt;
+        double deltaS = -(deltaX / simYxs);
+
+        currentX += deltaX;
+        currentS += deltaS;
+
+        textTiempo.text = "Tiempo transcurrido: " + timeElapsed.ToString("F2") + " hrs";
+
+        double biomasaInicial = sliderX0.value;
+        double productividad = 0;
+        if (timeElapsed > 0.001)
+        {
+            productividad = (currentX - biomasaInicial) / timeElapsed;
+            if (productividad < 0) productividad = 0; 
+        }
+        textProductividad.text = "Productividad: " + productividad.ToString("F2") + " g/L·h";
+
+        topHudTextS.text = $"[S] Actual:\n{currentS:F2}";
+        topHudTextX.text = $"[X] Actual:\n{currentX:F2}";
+        topHudTextU.text = $"Vel. Específica (µ):\n{currentU:F4}";
+
+        if (currentU > 0.0001)
+        {
+            double tDuplicacion = System.Math.Log(2.0) / currentU;
+            textTiempoDuplicacion.text = $"Tiempo de Duplicación:\n{tDuplicacion:F2} hrs";
+        }
+        else
+        {
+            textTiempoDuplicacion.text = "Tiempo de Duplicación:\nIncalculable (µ → 0)";
+        }
+
+        // --- ACTUALIZAR GRÁFICA E HISTORIAL ---
+        timerGrafica += (float)dt;
+        if (timerGrafica >= intervaloMuestreo)
+        {
+            bioChart.AgregarPunto((float)timeElapsed, (float)currentX, (float)currentS);
+            
+            // Guardamos el punto exacto en nuestra lista de memoria para el Tooltip
+            PuntoSimulado nuevoPunto;
+            nuevoPunto.tiempo = (float)timeElapsed;
+            nuevoPunto.biomasa = (float)currentX;
+            nuevoPunto.sustrato = (float)currentS;
+            historialPuntos.Add(nuevoPunto);
+
+            timerGrafica = 0f;
+        }
+
+        if (currentS <= 0.01 && !yaSeAgoto)
+        {
+            yaSeAgoto = true; 
+            textSustratoAgotado.text = $"Sustrato agotado en:\n{timeElapsed:F2} hrs";
+            textConsole.text = $"Sustrato agotado a las t={timeElapsed:F2} hrs. La simulación continúa.";
+        }
+    }
+
+    public void SetSpeed1X() { simSpeed = 1f; }
+    public void SetSpeed2X() { simSpeed = 2f; }
+    public void SetSpeed5X() { simSpeed = 5f; }
+
+    public void DetenerSimulacion()
+    {
+        if (!isSimulating) return; 
+        isSimulating = false; 
+        textConsole.text = "Simulación interrumpida por el usuario.";
+
+        if (!yaSeAgoto) 
+        {
+            textSustratoAgotado.text = "Sustrato agotado en:\nNo agotado (Interrumpido)";
+        }
+    }
+
+    public void ReiniciarSimulacion() 
+    { 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
+        bioChart.LimpiarGrafica();
+        historialPuntos.Clear();
+        textTiempo.text = "Tiempo transcurrido: --";
+        textProductividad.text = "Productividad: --";
     }
 }
